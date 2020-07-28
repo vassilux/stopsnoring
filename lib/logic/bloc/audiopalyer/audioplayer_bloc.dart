@@ -33,15 +33,14 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvents, NoiserAudioPlayerState> {
         }
         print("_isPlayning $_isPlaying");
       });
-
-      //this.add(PlayPlayer());
       yield this.state;
     }
+
     if (event is PlayPlayer) {   
       if(_isPlaying == false)  {
-        _audioCache.play(this.state.source);
-         _isPlaying = true;
+        _audioCache.play(this.state.source);         
       }
+      
       yield this.state;
      
     }

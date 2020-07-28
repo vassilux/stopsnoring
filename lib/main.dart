@@ -34,15 +34,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
+  int _targetDecibel;
+
   @override
   void initState() {
     super.initState();
+    this._targetDecibel = 50;
     BlocProvider.of<AudioPlayerBloc>(context).add(InitializePlayer("sounds/horse-whinnies.mp3"));
   }
 
   Widget _buldCommand(BuildContext context) {
-    return BlocBuilder<NoiserBloc, NoiserState>(
-        bloc: BlocProvider.of<NoiserBloc>(context),
+    return BlocBuilder<NoiserBloc, NoiserState>(        
         builder: (context, state) {
           var isRecording = true;
           if ((state is NoiserStopped) || (state is NoiserInitial)) {
@@ -61,9 +63,45 @@ class _MyAppState extends State<MyApp> {
                   BlocProvider.of<NoiserBloc>(context)
                       .add(new NoiserStartEvent());
                 }
-              }, //_isRecording ? stop : start,
+              }, 
               child: isRecording ? Icon(Icons.stop) : Icon(Icons.play_arrow));
-        }); //FlatButton.icon(onPressed: null, icon: null, label: null);
+        }); 
+  }
+
+  Widget _buildNoiserSlide(BuildContext context){
+    return Column(
+      children: [
+        Center(
+          child: Text("Target ${_targetDecibel.toInt()} dBA",
+              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,                               
+                                fontWeight: FontWeight.w700),),
+        ),
+        Slider(
+          value: _targetDecibel.toDouble(),
+          min: 20,
+          max: 180,
+          divisions: 10,
+          label: '${_targetDecibel.toInt()}',
+          onChangeStart: (double value) {
+            
+          },
+          onChangeEnd: (double value) {
+            
+          },
+          onChanged: (double newValue) {            
+            setState(() {
+              _targetDecibel = newValue.round();
+              print('onChanged value is ' + newValue.toString());
+              /**/
+            });
+          },
+          activeColor: Colors.red,
+          inactiveColor: Colors.blue,
+        )
+      ],
+    );
   }
   
 
@@ -71,10 +109,9 @@ class _MyAppState extends State<MyApp> {
     final Function wp = Screen(context).wp;
     final Function hp = Screen(context).hp;
 
-    return BlocBuilder<NoiserBloc, NoiserState>(
-        bloc: BlocProvider.of<NoiserBloc>(context),
+    return BlocBuilder<NoiserBloc, NoiserState>(       
         builder: (context, state) {
-          List<double> decibels = [50];
+          List<double> decibels = [];
           String dBAStringValue = "0";
           double dBAValue = 0;
 
@@ -86,7 +123,7 @@ class _MyAppState extends State<MyApp> {
             decibels = [];
           }
 
-          if(dBAValue > 66) {
+          if(dBAValue > _targetDecibel.toDouble()) {
             BlocProvider.of<AudioPlayerBloc>(context).add(PlayPlayer());
           }
 
@@ -107,18 +144,24 @@ class _MyAppState extends State<MyApp> {
                 Expanded(
                   flex: 2,
                   child: Container(
+                    child: Center(child: _buildNoiserSlide(context)),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Container(
                     child: Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
+                          
                           Text(
                             '$dBAStringValue',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 50,
-                                color: Colors.white,
-                                // fontFamily: 'DSEG7 Modern',
+                                color: Colors.white,                               
                                 fontWeight: FontWeight.w700),
                           ),
                           Text(
@@ -126,8 +169,7 @@ class _MyAppState extends State<MyApp> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 30,
-                              color: Colors.white,
-                              // fontFamily: 'DSEG7 Modern',
+                              color: Colors.white,                            
                             ),
                           )
                         ],
@@ -136,11 +178,12 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
                 Expanded(
-                  flex: 10,
+                  flex: 8,
                   child: Container(
                     color: Colors.red,
                     child: Stack(
                       children: <Widget>[
+                        
                         Center(
                           child: Container(
                             color: Colors.blueAccent,
@@ -165,7 +208,7 @@ class _MyAppState extends State<MyApp> {
                             child: Center(
                               child: LineChart(
                                 data: decibels,
-                                size: Size(wp(100), hp(20)),
+                                size: Size(wp(100), 100),
                                 lineWidth: 5,
                                 lineColor: Colors.white,
                                 pointSize: 10,
@@ -174,6 +217,7 @@ class _MyAppState extends State<MyApp> {
                             ),
                           ),
                         ),
+                        
                       ],
                     ),
                   ),
@@ -191,8 +235,7 @@ class _MyAppState extends State<MyApp> {
         Container(
             margin: EdgeInsets.all(0),
             child: Column(children: [ 
-              BlocBuilder<NoiserBloc, NoiserState>(
-                  bloc: BlocProvider.of<NoiserBloc>(context),
+              BlocBuilder<NoiserBloc, NoiserState>(                 
                   builder: (context, state) {
                     return _buildBody(context);
                   }),             
